@@ -1,15 +1,10 @@
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 dotenv.config();
 
-// Validate and get env variable 
-export const getEnvVariable = (name: string): string => {
-    const value = process.env[name];
-    if (!value) {
-        console.error(`Error: Environment variable '${name}' is not defined.`);
-        process.exit(1);
-    }
-    return value;
+export const getEnv = (key: string, fallback = ''): string => {
+  const val = process.env[key];
+  if (!val && !fallback) {
+    throw new Error(`Missing env variable: ${key}`);
+  }
+  return val || fallback;
 };
-
-
-

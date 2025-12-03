@@ -1,28 +1,25 @@
-import { Request, Response } from "express";
-import { AnalyticsModel } from "../models/analytics.model";
-import { sendRealtimeUpdate } from "../services/socket.service";
+import { Request, Response } from 'express';
+import * as analyticsService from '../services/analytics.service';
+import { broadcastEvent } from '../services/socket.service';
 
-export const addAnalytics = async (req: Request, res: Response) => {
+export const createEvent = async (req: Request, res: Response) => {
   try {
-    const data = await AnalyticsModel.create(req.body);
-
-    // Send real-time update
-    sendRealtimeUpdate(data);
-
-    res.status(201).json({
-      success: true,
-      message: "Analytics recorded",
-      data,
-    });
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Error saving analytics" });
+    const { eventType, metadata } = req.body;
+    const saved = await analyticsService.logEvent({ eventType, metadata });
+    // broadcast to connected clients
+    broadcastEvent('analytics:new_event', saved);
+    res.status(201).json({ success: true, data: saved });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-export const getAnalytics = async (req: Request, res: Response) => {
-  const data = await AnalyticsModel.find().sort({ timestamp: -1 });
-  res.json(data);
+export const recentEvents = async (_req: Request, res: Response) => {
+  try {
+    const events = await analyticsService.getRecentEvents(100);
+    res.json({ success: true, data: events });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
 };
-

@@ -1,22 +1,15 @@
-import mongoose, { Document, Schema } from "mongoose";
+import { Schema, model, Document } from 'mongoose';
 
 export interface IAnalytics extends Document {
-  ip: string;
-  page: string;
-  browser: string;
-  device: string;
-  timestamp: Date;
+  eventType: string;
+  metadata: Record<string, any>;
+  createdAt: Date;
 }
 
 const AnalyticsSchema = new Schema<IAnalytics>({
-  ip: String,
-  page: String,
-  browser: String,
-  device: String,
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
+  eventType: { type: String, required: true },
+  metadata: { type: Schema.Types.Mixed, default: {} },
+  createdAt: { type: Date, default: () => new Date() }
 });
 
-export const AnalyticsModel = mongoose.model("Analytics", AnalyticsSchema);
+export const AnalyticsModel = model<IAnalytics>('Analytics', AnalyticsSchema);

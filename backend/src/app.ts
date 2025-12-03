@@ -1,13 +1,14 @@
 import express from "express";
 import cors from "cors";
 import analyticsRoutes from "./routes/analytics.routes";
-import { setupSwagger } from "./config/swagger";
+import { setupSwagger } from "./swagger";
 
-export const app = express();
+const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/analytics", analyticsRoutes);
 setupSwagger(app);
 
-app.use("/api", analyticsRoutes);
+export default app;
